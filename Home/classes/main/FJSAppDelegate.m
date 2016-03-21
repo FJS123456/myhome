@@ -6,17 +6,36 @@
 //  Copyright © 2016年 fujisheng. All rights reserved.
 //
 
-#import "AppDelegate.h"
+#import "FJSAppDelegate.h"
+#import "FJSViewController.h"
+#import "FJSLoginViewController.h"
+#import <SMS_SDK/SMSSDK.h>
+#import <SMS_SDK/Extend/SMSSDK+AddressBookMethods.h>
 
-@interface AppDelegate ()
+//SMSSDK官网公共key
+#define appkey @"f3fc6baa9ac4"
+#define app_secrect @"7f3dedcb36d92deebcb373af921d635a"
+
+@interface FJSAppDelegate ()
 
 @end
 
-@implementation AppDelegate
+@implementation FJSAppDelegate
 
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    [SMSSDK registerApp:appkey
+             withSecret:app_secrect];
+    
+    FJSLoginViewController *controller = [[FJSLoginViewController alloc] init];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
+    self.window.rootViewController = nav;
+    
+    [self.window makeKeyAndVisible];
+    
     return YES;
 }
 

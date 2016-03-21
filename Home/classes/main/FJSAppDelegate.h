@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  FJSAppDelegate.h
 //  Home
 //
 //  Created by fujisheng on 16/3/14.
@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface FJSAppDelegate : UIResponder <UIApplicationDelegate>
+
+@property (strong, nonatomic) UIWindow *window;
 
 
 @end
