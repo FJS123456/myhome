@@ -7,9 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FJSRequestParam.h"
 
 @interface FJSApiRequest : NSObject
 
-+ (void)postRequestWithUrl:(NSString *)urlStr bodyDict:(NSDictionary *)bodyDict tagert:(id)tagert okSel:(SEL)okSel errorSel:(SEL)errorSel failSel:(SEL)failSel;
++ (void)postRequestWithUrl:(NSString *)urlStr bodyDict:(NSMutableDictionary *)bodyDict successBlock:(FJSSuccessBlock)successBlock
+                 failBlock:(FJSFailBlock)failBlock;
+
++ (void)uploadImagesWithUrl:(NSString *)urlStr bodyDict:(NSMutableDictionary *)bodyDict imageDataArray:(NSArray *)imageDatas successBlock:(FJSSuccessBlock)successBlock
+                 failBlock:(FJSFailBlock)failBlock;
+
++ (void)uploadVideoWithUrl:(NSString *)urlStr bodyDict:(NSMutableDictionary *)bodyDict fileUrl:(NSURL *)fileUrl successBlock:(FJSSuccessBlock)successBlock
+                  failBlock:(FJSFailBlock)failBlock;
 
 @end

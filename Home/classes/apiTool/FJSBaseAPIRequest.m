@@ -8,6 +8,14 @@
 
 #import "FJSBaseAPIRequest.h"
 #import "FJSRequestParam.h"
+#import "AFNetworking.h"
+#import "FJSConst.h"
+
+#define FJSCustomErrorDomain @"customError"
+
+typedef enum {
+    FJSErrorTypeDefault = -100
+}FJSErrorType;
 
 @implementation FJSBaseAPIRequest
 
@@ -34,15 +42,20 @@
         
         NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             if (error) {
-                [param.target performSelectorOnMainThread:param.errorSelector withObject:error waitUntilDone:YES];
+                param.failBlock(error);
             } else {
                 NSDictionary *requestData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
-                NSLog(@"%@",requestData);
+//                NSLog(@"%@",requestData);
                 if ([[requestData objectForKey:@"error_code"] integerValue] == 1) { //请求成功
-                    [param.target performSelectorOnMainThread:param.okSelector withObject:requestData waitUntilDone:YES];
+                    param.successBlock(requestData);
                 } else {
                     NSString *failMsg = [requestData objectForKey:@"msg"];
-                    [param.target performSelectorOnMainThread:param.failSelector withObject:failMsg waitUntilDone:YES];
+                    if (failMsg == nil) {
+                        failMsg = @"网络连接有问题";
+                    }
+                    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:failMsg forKey:NSLocalizedDescriptionKey];
+                    NSError *failError = [NSError errorWithDomain:FJSCustomErrorDomain code:FJSErrorTypeDefault userInfo:userInfo];
+                    param.failBlock(failError);
                 }
             }
         }];
@@ -55,6 +68,55 @@
 + (void)getRequestWithRequestParam:(FJSRequestParam *)param
 {
     
+}
+
++ (void)uploadImagesWithRequestParam:(FJSRequestParam *)param imageDataArray:(NSArray *)imageDatas;
+{
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    
+    for (int i = 0 ; i < imageDatas.count; ++i) {
+        UIImage *image = imageDatas[i];
+        NSData *fileData = UIImageJPEGRepresentation(image, 1.0);
+        param.bodyDict[@"width"] = @(image.size.width);
+        param.bodyDict[@"height"] = @(image.size.height);
+        [mgr POST:param.urlStr parameters:param.bodyDict constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+            
+            [formData appendPartWithFileData:fileData name:@"file" fileName:@"" mimeType:@"image/jpg"];
+            
+        } progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            if (i == imageDatas.count - 1) {
+                param.successBlock(responseObject);
+            }
+            
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            
+            if (error) {
+                param.failBlock(error);
+            }
+        }];
+    }
+}
+
++ (void)uploadVideoWithRequestParam:(FJSRequestParam *)param fileUrl:(NSURL *)fileUrl
+{
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    [mgr POST:param.urlStr parameters:param.bodyDict constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        
+        NSError *error = nil;
+        [formData appendPartWithFileURL:fileUrl name:@"file" fileName:@"" mimeType:@"video/quicktime" error:&error];
+        if (error) {
+            FJSLog(@"%@",error);
+        }
+        
+    } progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            param.successBlock(responseObject);
+        
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        
+        if (error) {
+            param.failBlock(error);
+        }
+    }];
 }
 
 @end

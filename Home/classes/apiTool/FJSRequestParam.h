@@ -8,15 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void (^FJSSuccessBlock)(id responseData);
+typedef void (^FJSFailBlock)(NSError *error);
+
 @interface FJSRequestParam : NSObject
 
-@property (weak,nonatomic) id target;
-@property (assign,nonatomic) SEL okSelector;       //成功时的回调
-@property (assign,nonatomic) SEL errorSelector;    //系统调用失败时的回调
-@property (assign,nonatomic) SEL failSelector;     //服务器调用失败时的回调
 @property (strong,nonatomic) NSMutableDictionary *bodyDict;   //请求体
-
 @property (strong,nonatomic) NSString *urlStr;
 
+@property (copy,nonatomic) FJSSuccessBlock successBlock;
+@property (copy,nonatomic) FJSFailBlock failBlock;
 
 @end
